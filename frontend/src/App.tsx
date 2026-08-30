@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { Header, Sidebar, BenchmarkChart, ComparisonTable, FormulaList, ResultsVerifier } from './components';
 import { useBenchmarkResults } from './hooks/useBenchmark';
+import { USE_STATIC_DATA } from './data/staticData';
 
 /**
  * Navigation section type
@@ -77,6 +78,66 @@ function VerificationContent() {
 }
 
 function BenchmarkContent() {
+  // If using static data, show demo message instead of run buttons
+  if (USE_STATIC_DATA) {
+    return (
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Run Benchmark</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Execute performance tests for calculation methods
+          </p>
+        </div>
+        <div className="p-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+            <div className="text-4xl mb-4">📊</div>
+            <h3 className="text-lg font-semibold text-blue-900 mb-2">Demo Mode</h3>
+            <p className="text-blue-700 mb-4">
+              This dashboard displays pre-computed benchmark results.
+            </p>
+            <p className="text-sm text-blue-600">
+              To run live benchmarks, clone the repository and run locally with Docker:
+            </p>
+            <code className="block mt-2 bg-blue-100 rounded px-3 py-2 text-sm text-blue-800">
+              docker-compose up -d
+            </code>
+            <a 
+              href="https://github.com/RutWaldman/formula-benchmark" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              View on GitHub
+            </a>
+          </div>
+          
+          {/* Show completed results summary */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="border border-green-200 bg-green-50 rounded-lg p-4 text-center">
+              <div className="h-3 w-3 rounded-full bg-purple-600 mx-auto mb-2" />
+              <h3 className="font-medium text-gray-900">.NET (DataTable)</h3>
+              <p className="text-2xl font-bold text-green-600 mt-2">133.75s</p>
+              <p className="text-sm text-green-700">✓ Completed - Fastest</p>
+            </div>
+            <div className="border border-green-200 bg-green-50 rounded-lg p-4 text-center">
+              <div className="h-3 w-3 rounded-full bg-blue-500 mx-auto mb-2" />
+              <h3 className="font-medium text-gray-900">Python (eval)</h3>
+              <p className="text-2xl font-bold text-green-600 mt-2">710.92s</p>
+              <p className="text-sm text-green-700">✓ Completed</p>
+            </div>
+            <div className="border border-green-200 bg-green-50 rounded-lg p-4 text-center">
+              <div className="h-3 w-3 rounded-full bg-orange-500 mx-auto mb-2" />
+              <h3 className="font-medium text-gray-900">SQL (Dynamic)</h3>
+              <p className="text-2xl font-bold text-green-600 mt-2">372.05s</p>
+              <p className="text-sm text-green-700">✓ Completed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Live mode - original code
   const [running, setRunning] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, { status: string; time?: number; error?: string }>>({});
 
