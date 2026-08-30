@@ -1,0 +1,7 @@
+# This file ensures the screenshots directory is tracked by git
+# Add your screenshots here:
+# - database_t_data.png
+# - database_t_targil.png
+# - database_t_results.png
+# - dashboard_overview.png
+# - dashboard_chart.png
