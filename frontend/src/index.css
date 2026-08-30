@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the benchmark dashboard */
+:root {
+  --color-dotnet: #512BD4;
+  --color-python: #3776AB;
+  --color-sql: #F29111;
+}
+
+/* Chart tooltip customization */
+.recharts-tooltip-wrapper {
+  @apply shadow-lg rounded-lg;
+}
+
+/* Table styles */
+.benchmark-table {
+  @apply min-w-full divide-y divide-gray-200;
+}
+
+.benchmark-table th {
+  @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.benchmark-table td {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+}
+
+/* Method badges */
+.method-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.method-badge-dotnet {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.method-badge-python {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.method-badge-sql {
+  @apply bg-orange-100 text-orange-800;
+}
+
+/* Card component */
+.card {
+  @apply bg-white overflow-hidden shadow rounded-lg;
+}
+
+.card-header {
+  @apply px-4 py-5 sm:px-6 border-b border-gray-200;
+}
+
+.card-body {
+  @apply px-4 py-5 sm:p-6;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin h-5 w-5 text-gray-500;
+}
