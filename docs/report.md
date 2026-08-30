@@ -250,6 +250,36 @@ Python   ███████████████████████�
 
 ![דוגמת נתונים](screenshots/DB_data.png)
 
+### 💻 קוד יצירת מיליון רשומות
+
+הקוד הבא מייצר את מיליון הרשומות בטבלת `t_data`:
+
+**קובץ:** `database/populate_data.sql`
+
+```sql
+-- Insert 1,000,000 records with random values
+-- Using generate_series for efficient bulk insert in PostgreSQL
+INSERT INTO t_data (a, b, c, d)
+SELECT 
+    -- a: random value between 0 and 100
+    (random() * 100)::FLOAT,
+    -- b: random value between 1 and 101 (avoid zero for division safety)
+    (random() * 100 + 1)::FLOAT,
+    -- c: random value between 1 and 100 (positive for sqrt safety)
+    (random() * 99 + 1)::FLOAT,
+    -- d: random value between 0 and 100
+    (random() * 100)::FLOAT
+FROM generate_series(1, 1000000);
+```
+
+**הסבר:**
+- משתמש ב-`generate_series(1, 1000000)` ליצירת מיליון שורות בפקודה אחת
+- כל עמודה מקבלת ערך אקראי בטווח מוגדר:
+  - `a`: 0-100
+  - `b`: 1-101 (לא אפס - למניעת חילוק באפס)
+  - `c`: 1-100 (חיובי - לפעולות שורש)
+  - `d`: 0-100
+
 ---
 
 ## ✅ עמידה בדרישות
