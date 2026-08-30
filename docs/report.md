@@ -68,6 +68,49 @@
 - **0 אי-התאמות**
 - **Perfect Match!** - כל 11 מיליון התוצאות זהות בין כל השיטות
 
+### 💻 סקריפט ההשוואה
+
+השאילתה הבאה משווה את התוצאות בין שלוש השיטות ומוצאת אי-התאמות:
+
+**קובץ:** `api/services/database.py` - פונקציה `verify_results()`
+
+```sql
+-- השוואת תוצאות בין השיטות השונות
+WITH method_results AS (
+    SELECT 
+        r.data_id,
+        r.targil_id,
+        MAX(CASE WHEN r.method = 'DotNet_DataTable' THEN r.result END) as dotnet_result,
+        MAX(CASE WHEN r.method = 'Python_Eval' THEN r.result END) as python_result,
+        MAX(CASE WHEN r.method = 'SQL_Dynamic' THEN r.result END) as sql_result
+    FROM t_results r
+    GROUP BY r.data_id, r.targil_id
+)
+SELECT 
+    data_id,
+    targil_id,
+    dotnet_result,
+    python_result,
+    sql_result,
+    GREATEST(
+        ABS(COALESCE(dotnet_result, 0) - COALESCE(python_result, 0)),
+        ABS(COALESCE(python_result, 0) - COALESCE(sql_result, 0)),
+        ABS(COALESCE(dotnet_result, 0) - COALESCE(sql_result, 0))
+    ) as max_difference
+FROM method_results
+WHERE 
+    -- מוצא שורות שבהן יש הפרש גדול מהסבילות (tolerance)
+    ABS(COALESCE(dotnet_result, 0) - COALESCE(python_result, 0)) > 1e-9
+    OR ABS(COALESCE(python_result, 0) - COALESCE(sql_result, 0)) > 1e-9
+    OR ABS(COALESCE(dotnet_result, 0) - COALESCE(sql_result, 0)) > 1e-9
+LIMIT 100;
+```
+
+**הסבר:**
+1. **PIVOT** - ממיר את התוצאות משלוש שורות (לכל שיטה) לשלוש עמודות
+2. **GREATEST + ABS** - מחשב את ההפרש המקסימלי בין כל זוג שיטות
+3. **tolerance** - סבילות של `1e-9` (0.000000001) להבדלי דיוק נומרי קטנים
+
 ---
 
 ## 📊 תוצאות מפורטות לפי נוסחה
