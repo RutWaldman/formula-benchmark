@@ -1,0 +1,69 @@
+# Docker Compose for Dynamic Formula Benchmark System
+# This sets up PostgreSQL for local development
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: formula_benchmark_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: formula_benchmark
+      POSTGRES_USER: benchmark_user
+      POSTGRES_PASSWORD: benchmark_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./database/populate_data.sql:/docker-entrypoint-initdb.d/02-populate.sql:ro
+      - ./database/stored_procedures.sql:/docker-entrypoint-initdb.d/03-procedures.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U benchmark_user -d formula_benchmark"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: formula_benchmark_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://benchmark_user:benchmark_pass@postgres:5432/formula_benchmark
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: formula_benchmark_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@benchmark.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    name: formula_benchmark_postgres_data
+  pgadmin_data:
+    name: formula_benchmark_pgadmin_data
+
+networks:
+  default:
+    name: formula_benchmark_network
