@@ -1,6 +1,7 @@
 /**
  * API Service Layer for Dynamic Formula Benchmark Dashboard
  * Provides functions to interact with the benchmark API
+ * Supports both live API and static data mode for deployment
  */
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
@@ -11,6 +12,13 @@ import type {
   Formula,
   BenchmarkStatus,
 } from '../types';
+import {
+  STATIC_BENCHMARK_RESULTS,
+  STATIC_FORMULAS,
+  STATIC_COMPARISON,
+  STATIC_VERIFICATION,
+  USE_STATIC_DATA,
+} from '../data/staticData';
 
 // API base URL - defaults to localhost for development
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -62,11 +70,17 @@ function handleApiError(error: unknown): never {
  * Returns timing data for each formula across all calculation methods
  */
 export async function getBenchmarkResults(): Promise<BenchmarkResult[]> {
+  // Use static data if configured or API unavailable
+  if (USE_STATIC_DATA) {
+    return Promise.resolve(STATIC_BENCHMARK_RESULTS);
+  }
   try {
     const response = await apiClient.get<BenchmarkResult[]>('/api/benchmark/results');
     return response.data;
   } catch (error) {
-    handleApiError(error);
+    // Fallback to static data on error
+    console.warn('API unavailable, using static data');
+    return STATIC_BENCHMARK_RESULTS;
   }
 }
 
@@ -75,11 +89,15 @@ export async function getBenchmarkResults(): Promise<BenchmarkResult[]> {
  * Returns aggregated statistics for each method
  */
 export async function getComparison(): Promise<MethodComparison[]> {
+  if (USE_STATIC_DATA) {
+    return Promise.resolve(STATIC_COMPARISON);
+  }
   try {
     const response = await apiClient.get<MethodComparison[]>('/api/benchmark/comparison');
     return response.data;
   } catch (error) {
-    handleApiError(error);
+    console.warn('API unavailable, using static data');
+    return STATIC_COMPARISON;
   }
 }
 
@@ -105,11 +123,15 @@ export async function runBenchmark(
  * Returns the list of formulas with their configurations
  */
 export async function getFormulas(): Promise<Formula[]> {
+  if (USE_STATIC_DATA) {
+    return Promise.resolve(STATIC_FORMULAS);
+  }
   try {
     const response = await apiClient.get<Formula[]>('/api/formulas');
     return response.data;
   } catch (error) {
-    handleApiError(error);
+    console.warn('API unavailable, using static data');
+    return STATIC_FORMULAS;
   }
 }
 
@@ -118,11 +140,15 @@ export async function getFormulas(): Promise<Formula[]> {
  * Returns verification status and any discrepancies found
  */
 export async function verifyResults(): Promise<VerificationResult> {
+  if (USE_STATIC_DATA) {
+    return Promise.resolve(STATIC_VERIFICATION);
+  }
   try {
     const response = await apiClient.get<VerificationResult>('/api/results/verify');
     return response.data;
   } catch (error) {
-    handleApiError(error);
+    console.warn('API unavailable, using static data');
+    return STATIC_VERIFICATION;
   }
 }
 
